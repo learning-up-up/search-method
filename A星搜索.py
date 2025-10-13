@@ -39,13 +39,14 @@ def draw_map(map, path = None):
         plt.plot(path_y, path_x, color = 'red')
     plt.scatter(map.begin[1], map.begin[0], color = 'blue', s = 100, label = 'Start')
     plt.scatter(map.target[1], map.target[0], color = 'green', s = 100, label = 'Target')
+    plt.legend()
     plt.show()  
   
 def search(map):
     begin = Point(None, map.begin[0], map.begin[1])
     group = [begin]
     # W为启发式函数的权重，对于W>1的情况，启发式函数会被放大，搜索速度更快，但可能不最优
-    w = 2
+    w = 1 # w 可以调整为大于1的值来减少搜索次数
     # 搜索次数
     search_count = 0
     while search_count < 10000:
@@ -60,16 +61,16 @@ def search(map):
                 point = point.parent
             path.reverse()
             print(path)
-            map.info[map.info == -1] = np.max(map.info) + 5
-            map.info = map.info / (np.max(map.info) + 5)
+            map.info[map.info == -1] = np.max(map.info) + 10
+            map.info = map.info / np.max(map.info)
                 
             draw_map(map, path)
             return
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
             new_x = point.x + dx
             new_y = point.y + dy
-            if 0 <= new_x < map.length and 0 <= new_y < map.width and map.info[new_x, new_y] == 0:
-                map.info[new_x, new_y] += 5
+            if 0 <= new_x < map.length and 0 <= new_y < map.width and map.info[new_x, new_y] >= 0 and ((new_x, new_y) != (point.parent.x, point.parent.y) if point.parent else True):
+                map.info[new_x, new_y] += 3
                 group.append(Point(point, new_x, new_y))
 
     print("Search failed")
